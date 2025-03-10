@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Transcription</title>
+</head>
+<body>
+    <h1>Upload an Audio File for Transcription</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="file" id="fileInput" accept="audio/*" required>
+        <button type="submit">Upload</button>
+    </form>
+    
+    <h2>Transcribed Text:</h2>
+    <pre id="transcribedText"></pre>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById("fileInput").files[0];
+            if (!fileInput) {
+                console.log("❌ No file selected!");
+                document.getElementById("transcribedText").textContent = "No file selected!";
+                return;
+            }
+
+            console.log("📤 Uploading file:", fileInput.name);
+            document.getElementById("transcribedText").textContent = "Uploading...";
+
+            const formData = new FormData();
+            formData.append("file", fileInput);
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/upload", { 
+                    method: "POST", 
+                    body: formData 
+                });
+                console.log("Response status:", response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server responded with ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log("✅ Parsed JSON:", data);
+
+                if (data.text) {
+                    document.getElementById("transcribedText").textContent = data.text;
+                } else if (data.error) {
+                    document.getElementById("transcribedText").textContent = "Error: " + data.error;
+                } else {
+                    document.getElementById("transcribedText").textContent = "Unexpected response from server.";
+                }
+            } catch (error) {
+                console.error("❌ Fetch error:", error);
+                document.getElementById("transcribedText").textContent = "Upload failed: " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

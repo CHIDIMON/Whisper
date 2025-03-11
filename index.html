@@ -13,6 +13,7 @@
         <form id="uploadForm" enctype="multipart/form-data">
             <input type="file" name="file" id="fileInput" accept="audio/*">
             <label for="fileInput">Select File</label>
+            <span id="fileName"></span> <!-- แสดงชื่อไฟล์ที่เลือก -->
             <button type="submit">Upload Audio File</button>
         </form>
 
@@ -30,6 +31,7 @@
         let audioChunks = [];
         let audioBlob = null;
 
+        // ฟังก์ชันสำหรับอัพโหลดไฟล์
         document.getElementById("uploadForm").addEventListener("submit", async function(event) {
             event.preventDefault();
             const fileInput = document.getElementById("fileInput").files[0];
@@ -56,6 +58,7 @@
             }
         });
 
+        // ฟังก์ชันเริ่มบันทึกเสียง
         document.getElementById("recordButton").addEventListener("click", async function() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -78,12 +81,14 @@
             }
         });
 
+        // ฟังก์ชันหยุดการบันทึก
         document.getElementById("stopButton").addEventListener("click", function() {
             mediaRecorder.stop();
             document.getElementById("stopButton").disabled = true;
             document.getElementById("recordButton").disabled = false;
         });
 
+        // ฟังก์ชันอัพโหลดไฟล์เสียงที่บันทึก
         document.getElementById("uploadButton").addEventListener("click", async function() {
             if (!audioBlob) {
                 alert("No audio recorded!");
@@ -114,6 +119,12 @@
             } else {
                 document.getElementById("transcribedText").textContent = "Error: " + data.error;
             }
+        });
+
+        // ฟังก์ชันแสดงชื่อไฟล์ที่เลือก
+        document.getElementById("fileInput").addEventListener("change", function(event) {
+            const fileName = event.target.files[0] ? event.target.files[0].name : "No file selected";
+            document.getElementById("fileName").textContent = fileName;
         });
     </script>
 </body>

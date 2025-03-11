@@ -4,29 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio Transcription</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Record or Upload Audio File for Transcription</h1>
-    
-    <form id="uploadForm" enctype="multipart/form-data">
-        <input type="file" name="file" id="fileInput" accept="audio/*">
-        <button type="submit">Upload Audio File</button>
-    </form>
+    <div class="container">
+        <h1>Record or Upload Audio File for Transcription</h1>
+        
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" accept="audio/*">
+            <label for="fileInput">Select File</label>
+            <button type="submit">Upload Audio File</button>
+        </form>
 
-    <button id="recordButton">Record Audio</button>
-    <button id="stopButton" disabled>Stop Recording</button>
-    <button id="uploadButton" disabled>Upload Recorded Audio</button>
-    <audio id="audioPlayer" controls></audio>
+        <button id="recordButton">Record Audio</button>
+        <button id="stopButton" disabled>Stop Recording</button>
+        <button id="uploadButton" disabled>Upload Recorded Audio</button>
+        <audio id="audioPlayer" controls></audio>
 
-    <h2>Transcribed Text:</h2>
-    <pre id="transcribedText"></pre>
+        <h2>Transcribed Text:</h2>
+        <pre id="transcribedText"></pre>
+    </div>
 
     <script>
         let mediaRecorder;
         let audioChunks = [];
         let audioBlob = null;
 
-        // Upload file via form
         document.getElementById("uploadForm").addEventListener("submit", async function(event) {
             event.preventDefault();
             const fileInput = document.getElementById("fileInput").files[0];
@@ -53,7 +56,6 @@
             }
         });
 
-        // Record audio using microphone
         document.getElementById("recordButton").addEventListener("click", async function() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -65,7 +67,7 @@
                     audioBlob = new Blob(audioChunks, { type: "audio/wav" });
                     const audioUrl = URL.createObjectURL(audioBlob);
                     document.getElementById("audioPlayer").src = audioUrl;
-                    document.getElementById("uploadButton").disabled = false;  // Enable upload button after recording
+                    document.getElementById("uploadButton").disabled = false;
                 };
                 mediaRecorder.start();
                 document.getElementById("stopButton").disabled = false;
@@ -76,14 +78,12 @@
             }
         });
 
-        // Stop recording and prepare to upload
         document.getElementById("stopButton").addEventListener("click", function() {
             mediaRecorder.stop();
             document.getElementById("stopButton").disabled = true;
             document.getElementById("recordButton").disabled = false;
         });
 
-        // Upload recorded audio to server
         document.getElementById("uploadButton").addEventListener("click", async function() {
             if (!audioBlob) {
                 alert("No audio recorded!");
@@ -102,15 +102,12 @@
 
             const data = await response.json();
             if (data.text) {
-                // Check if the transcribed text is in Thai (don't translate it)
                 const isThai = /[\u0E00-\u0E7F]/.test(data.text);
                 if (isThai) {
                     document.getElementById("transcribedText").textContent = data.text;
                 } else {
-                    // If not Thai, translate to English (you can add translation API here)
                     document.getElementById("transcribedText").textContent = "Translated: " + data.text;
                 }
-                // Clear previous data and reset for next recording
                 audioChunks = [];
                 audioBlob = null;
                 document.getElementById("uploadButton").disabled = true;

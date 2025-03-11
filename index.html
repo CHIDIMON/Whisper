@@ -121,10 +121,21 @@
             }
         });
 
-        // ฟังก์ชันแสดงชื่อไฟล์ที่เลือก
+        // ฟังก์ชันแสดงชื่อไฟล์ที่เลือกและเล่นไฟล์เสียง
         document.getElementById("fileInput").addEventListener("change", function(event) {
             const fileName = event.target.files[0] ? event.target.files[0].name : "No file selected";
             document.getElementById("fileName").textContent = fileName;
+
+            // ตรวจสอบว่าไฟล์ที่เลือกเป็นไฟล์เสียงหรือไม่
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('audio')) {
+                const audioUrl = URL.createObjectURL(file);
+                const audioPlayer = document.getElementById("audioPlayer");
+
+                // ตั้งค่า audioPlayer ให้ใช้ไฟล์เสียงที่เลือก
+                audioPlayer.src = audioUrl;
+                audioPlayer.style.display = 'block';  // แสดง audio player
+            }
         });
     </script>
 </body>

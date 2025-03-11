@@ -15,6 +15,7 @@
 
     <button id="recordButton">Record Audio</button>
     <button id="stopButton" disabled>Stop Recording</button>
+    <button id="uploadButton" disabled>Upload Recorded Audio</button>
     <audio id="audioPlayer" controls></audio>
 
     <h2>Transcribed Text:</h2>
@@ -23,6 +24,7 @@
     <script>
         let mediaRecorder;
         let audioChunks = [];
+        let audioBlob = null;
 
         // Upload file via form
         document.getElementById("uploadForm").addEventListener("submit", async function(event) {
@@ -35,6 +37,8 @@
 
             const formData = new FormData();
             formData.append("file", fileInput);
+
+            document.getElementById("transcribedText").textContent = "Uploading...";
 
             const response = await fetch("http://127.0.0.1:5000/upload", { 
                 method: "POST", 
@@ -58,10 +62,10 @@
                     audioChunks.push(event.data);
                 };
                 mediaRecorder.onstop = function() {
-                    const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                    audioBlob = new Blob(audioChunks, { type: "audio/wav" });
                     const audioUrl = URL.createObjectURL(audioBlob);
                     document.getElementById("audioPlayer").src = audioUrl;
-                    sendAudioToServer(audioBlob);
+                    document.getElementById("uploadButton").disabled = false;  // Enable upload button after recording
                 };
                 mediaRecorder.start();
                 document.getElementById("stopButton").disabled = false;
@@ -72,14 +76,22 @@
             }
         });
 
-        // Stop recording and send audio to server
+        // Stop recording and prepare to upload
         document.getElementById("stopButton").addEventListener("click", function() {
             mediaRecorder.stop();
             document.getElementById("stopButton").disabled = true;
             document.getElementById("recordButton").disabled = false;
         });
 
-        async function sendAudioToServer(audioBlob) {
+        // Upload recorded audio to server
+        document.getElementById("uploadButton").addEventListener("click", async function() {
+            if (!audioBlob) {
+                alert("No audio recorded!");
+                return;
+            }
+
+            document.getElementById("transcribedText").textContent = "Uploading...";
+
             const formData = new FormData();
             formData.append("file", audioBlob, "recording.wav");
 
@@ -90,11 +102,12 @@
 
             const data = await response.json();
             if (data.text) {
-                document.getElementById("transcribedText").textContent = data.text;
+                // Translate text to English (Add translation API logic if needed)
+                document.getElementById("transcribedText").textContent = "Translated: " + data.text;
             } else {
                 document.getElementById("transcribedText").textContent = "Error: " + data.error;
             }
-        }
+        });
     </script>
 </body>
 </html>

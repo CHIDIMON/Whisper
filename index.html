@@ -102,8 +102,18 @@
 
             const data = await response.json();
             if (data.text) {
-                // Translate text to English (Add translation API logic if needed)
-                document.getElementById("transcribedText").textContent = "Translated: " + data.text;
+                // Check if the transcribed text is in Thai (don't translate it)
+                const isThai = /[\u0E00-\u0E7F]/.test(data.text);
+                if (isThai) {
+                    document.getElementById("transcribedText").textContent = data.text;
+                } else {
+                    // If not Thai, translate to English (you can add translation API here)
+                    document.getElementById("transcribedText").textContent = "Translated: " + data.text;
+                }
+                // Clear previous data and reset for next recording
+                audioChunks = [];
+                audioBlob = null;
+                document.getElementById("uploadButton").disabled = true;
             } else {
                 document.getElementById("transcribedText").textContent = "Error: " + data.error;
             }

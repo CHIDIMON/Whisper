@@ -20,6 +20,10 @@ body {
     padding: 40px;
     text-align: center;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;         /* จัดตำแหน่งเนื้อหาภายในให้ตรงกลาง */
+    justify-content: center;     /* จัดให้เนื้อหาทั้งหมดอยู่กลาง */
 }
 
 h1 {
@@ -92,6 +96,15 @@ pre {
     word-wrap: break-word;
     max-height: 200px;
     overflow-y: auto;
+}
+
+/* จัดตำแหน่งกลางรูปภาพ */
+#menuImage {
+    display: block;
+    margin: 20px auto;           /* จัดให้อยู่ตรงกลาง */
+    max-width: 300px;            /* จำกัดขนาดสูงสุดของรูปภาพ */
+    height: auto;                /* ปรับความสูงให้สอดคล้องกับความกว้าง */
+    border-radius: 10px;         /* เพิ่มมุมโค้งให้กับรูปภาพ */
 }
 
 /* Mobile Styles */

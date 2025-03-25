@@ -13,7 +13,7 @@
         <form id="uploadForm" enctype="multipart/form-data">
             <input type="file" name="file" id="fileInput" accept="audio/*">
             <label for="fileInput">Select File</label>
-            <span id="fileName"></span> <!-- แสดงชื่อไฟล์ที่เลือก -->
+            <span id="fileName"></span>
             <button type="submit">Upload Audio File</button>
         </form>
 
@@ -24,25 +24,17 @@
 
         <h2>Transcribed Text:</h2>
         <pre id="transcribedText"></pre>
+        
+        <h2>Detected Menu:</h2>
+        <p id="menuName"></p>
+        <img id="menuImage" src="" style="display: none; max-width: 300px;" alt="Menu Image">
     </div>
 
     <script>
-        let mediaRecorder;
-        let audioChunks = [];
-        let audioBlob = null;
-
-        // ฟังก์ชันสำหรับอัพโหลดไฟล์
-        document.getElementById("uploadForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
-            const fileInput = document.getElementById("fileInput").files[0];
-            if (!fileInput) {
-                alert("No file selected!");
-                return;
-            }
-
+        async function uploadFile(file) {
             const formData = new FormData();
-            formData.append("file", fileInput);
-
+            formData.append("file", file);
+            
             document.getElementById("transcribedText").textContent = "Uploading...";
 
             const response = await fetch("http://127.0.0.1:5000/upload", { 
@@ -53,19 +45,39 @@
             const data = await response.json();
             if (data.text) {
                 document.getElementById("transcribedText").textContent = data.text;
+                
+                if (data.menu) {
+                    document.getElementById("menuName").textContent = "Menu: " + data.menu;
+                    document.getElementById("menuImage").src = `http://127.0.0.1:5000/image/${data.menu}`;
+                    document.getElementById("menuImage").style.display = "block";
+                } else {
+                    document.getElementById("menuName").textContent = "No matching menu found.";
+                    document.getElementById("menuImage").style.display = "none";
+                }
             } else {
                 document.getElementById("transcribedText").textContent = "Error: " + data.error;
             }
+        }
+
+        document.getElementById("uploadForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById("fileInput").files[0];
+            if (!fileInput) {
+                alert("No file selected!");
+                return;
+            }
+            uploadFile(fileInput);
         });
 
-        // ฟังก์ชันเริ่มบันทึกเสียง
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob = null;
+
         document.getElementById("recordButton").addEventListener("click", async function() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = function(event) {
-                    audioChunks.push(event.data);
-                };
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
                 mediaRecorder.onstop = function() {
                     audioBlob = new Blob(audioChunks, { type: "audio/wav" });
                     const audioUrl = URL.createObjectURL(audioBlob);
@@ -81,60 +93,28 @@
             }
         });
 
-        // ฟังก์ชันหยุดการบันทึก
         document.getElementById("stopButton").addEventListener("click", function() {
             mediaRecorder.stop();
             document.getElementById("stopButton").disabled = true;
             document.getElementById("recordButton").disabled = false;
         });
 
-        // ฟังก์ชันอัพโหลดไฟล์เสียงที่บันทึก
-        document.getElementById("uploadButton").addEventListener("click", async function() {
+        document.getElementById("uploadButton").addEventListener("click", function() {
             if (!audioBlob) {
                 alert("No audio recorded!");
                 return;
             }
-
-            document.getElementById("transcribedText").textContent = "Uploading...";
-
-            const formData = new FormData();
-            formData.append("file", audioBlob, "recording.wav");
-
-            const response = await fetch("http://127.0.0.1:5000/upload", { 
-                method: "POST", 
-                body: formData 
-            });
-
-            const data = await response.json();
-            if (data.text) {
-                const isThai = /[\u0E00-\u0E7F]/.test(data.text);
-                if (isThai) {
-                    document.getElementById("transcribedText").textContent = data.text;
-                } else {
-                    document.getElementById("transcribedText").textContent = "Translated: " + data.text;
-                }
-                audioChunks = [];
-                audioBlob = null;
-                document.getElementById("uploadButton").disabled = true;
-            } else {
-                document.getElementById("transcribedText").textContent = "Error: " + data.error;
-            }
+            uploadFile(audioBlob);
         });
 
-        // ฟังก์ชันแสดงชื่อไฟล์ที่เลือกและเล่นไฟล์เสียง
         document.getElementById("fileInput").addEventListener("change", function(event) {
             const fileName = event.target.files[0] ? event.target.files[0].name : "No file selected";
             document.getElementById("fileName").textContent = fileName;
-
-            // ตรวจสอบว่าไฟล์ที่เลือกเป็นไฟล์เสียงหรือไม่
+            
             const file = event.target.files[0];
             if (file && file.type.startsWith('audio')) {
                 const audioUrl = URL.createObjectURL(file);
-                const audioPlayer = document.getElementById("audioPlayer");
-
-                // ตั้งค่า audioPlayer ให้ใช้ไฟล์เสียงที่เลือก
-                audioPlayer.src = audioUrl;
-                audioPlayer.style.display = 'block';  // แสดง audio player
+                document.getElementById("audioPlayer").src = audioUrl;
             }
         });
     </script>

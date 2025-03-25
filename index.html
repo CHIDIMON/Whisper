@@ -10,18 +10,31 @@
     <div class="container">
         <h1>Record or Upload Audio File for Transcription</h1>
         
+        <!-- ฟอร์มสำหรับอัปโหลดไฟล์ -->
         <form id="uploadForm" enctype="multipart/form-data">
+            <label for="languageSelect">Select Language:</label>
+            <select id="languageSelect" name="language">
+                <option value="en">English</option>
+                <option value="th">Thai</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <!-- เพิ่มภาษาอื่นๆ ตามต้องการ -->
+            </select>
+            <br><br>
             <input type="file" name="file" id="fileInput" accept="audio/*">
             <label for="fileInput">Select File</label>
             <span id="fileName"></span>
             <button type="submit">Upload Audio File</button>
         </form>
 
+        <!-- ปุ่มสำหรับบันทึกเสียง -->
         <button id="recordButton">Record Audio</button>
         <button id="stopButton" disabled>Stop Recording</button>
         <button id="uploadButton" disabled>Upload Recorded Audio</button>
         <audio id="audioPlayer" controls></audio>
 
+        <!-- แสดงผลการถอดเสียงและเมนู -->
         <h2>Transcribed Text:</h2>
         <pre id="transcribedText"></pre>
         
@@ -31,9 +44,11 @@
     </div>
 
     <script>
-        async function uploadFile(file) {
+        // ฟังก์ชันอัปโหลดไฟล์
+        async function uploadFile(file, language) {
             const formData = new FormData();
             formData.append("file", file);
+            formData.append("language", language);  // ส่งภาษาที่เลือกไปกับไฟล์
             
             document.getElementById("transcribedText").textContent = "Uploading...";
 
@@ -59,16 +74,21 @@
             }
         }
 
+        // เมื่อผู้ใช้เลือกไฟล์
         document.getElementById("uploadForm").addEventListener("submit", function(event) {
             event.preventDefault();
             const fileInput = document.getElementById("fileInput").files[0];
+            const language = document.getElementById("languageSelect").value;  // รับภาษาจาก dropdown
+            
             if (!fileInput) {
                 alert("No file selected!");
                 return;
             }
-            uploadFile(fileInput);
+
+            uploadFile(fileInput, language);  // ส่งภาษาที่เลือกไปในฟังก์ชัน
         });
 
+        // การบันทึกเสียง
         let mediaRecorder;
         let audioChunks = [];
         let audioBlob = null;
@@ -104,9 +124,11 @@
                 alert("No audio recorded!");
                 return;
             }
-            uploadFile(audioBlob);
+            const language = document.getElementById("languageSelect").value;  // รับภาษาจาก dropdown
+            uploadFile(audioBlob, language);  // ส่งภาษาที่เลือกไปในฟังก์ชัน
         });
 
+        // เมื่อเลือกไฟล์จาก input
         document.getElementById("fileInput").addEventListener("change", function(event) {
             const fileName = event.target.files[0] ? event.target.files[0].name : "No file selected";
             document.getElementById("fileName").textContent = fileName;

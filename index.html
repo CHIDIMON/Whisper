@@ -52,7 +52,7 @@
             
             document.getElementById("transcribedText").textContent = "Uploading...";
 
-            const response = await fetch("http://127.0.0.1:5000/upload", { 
+            const response = await fetch("http://<IP_ADDRESS>:5000/upload", { 
                 method: "POST", 
                 body: formData 
             });
@@ -63,7 +63,7 @@
                 
                 if (data.menu) {
                     document.getElementById("menuName").textContent = "Menu: " + data.menu;
-                    document.getElementById("menuImage").src = `http://127.0.0.1:5000/image/${data.menu}`;
+                    document.getElementById("menuImage").src = `http://<IP_ADDRESS>:5000/image/${data.menu}`;
                     document.getElementById("menuImage").style.display = "block";
                 } else {
                     document.getElementById("menuName").textContent = "No matching menu found.";

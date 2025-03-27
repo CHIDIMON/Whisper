@@ -63,7 +63,7 @@
                 
                 if (data.menu) {
                     document.getElementById("menuName").textContent = "Menu: " + data.menu;
-                    document.getElementById("menuImage").src = `http://<IP_ADDRESS>:5000/image/${data.menu}`;
+                    document.getElementById("menuImage").src = `http://127.0.0.1:5000/upload/image/${data.menu}`;
                     document.getElementById("menuImage").style.display = "block";
                 } else {
                     document.getElementById("menuName").textContent = "No matching menu found.";

@@ -48,6 +48,8 @@
         <div id="cartPopup" class="cart-popup" style="display: none;">
             <h3>Your Cart</h3>
             <ul id="cartItems"></ul>
+            <button id="deleteOrderButton">Delete Order</button>
+            <button id="placeOrderButton">Place Order</button>
             <button id="closeCartPopup">Close</button>
         </div>
 
@@ -164,17 +166,51 @@
 
         // แสดง pop-up รถเข็น
         document.getElementById("viewCartButton").addEventListener("click", function() {
-            const cartItemsList = document.getElementById("cartItems");
-            cartItemsList.innerHTML = ''; // ล้างรายการเก่า
+    const cartItemsList = document.getElementById("cartItems");
+    cartItemsList.innerHTML = '';
 
-            cart.forEach(item => {
-                const li = document.createElement("li");
-                li.textContent = item;
-                cartItemsList.appendChild(li);
-            });
+    cart.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.textContent = item;
 
-            document.getElementById("cartPopup").style.display = "block";
+        // ปุ่มลบเมนูเฉพาะตัว
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "❌";
+        deleteButton.style.marginLeft = "10px";
+        deleteButton.style.color = "red";
+        deleteButton.style.border = "none";
+        deleteButton.style.cursor = "pointer";
+        deleteButton.addEventListener("click", function() {
+            cart.splice(index, 1);
+            document.getElementById("viewCartButton").click();
         });
+
+        li.appendChild(deleteButton);
+        cartItemsList.appendChild(li);
+    });
+
+    document.getElementById("cartPopup").style.display = "block";
+});
+
+// ลบออเดอร์ทั้งหมด
+document.getElementById("deleteOrderButton").addEventListener("click", function() {
+    cart = [];
+    document.getElementById("cartItems").innerHTML = "";
+    alert("Order deleted!");
+});
+
+// สั่งอาหาร
+document.getElementById("placeOrderButton").addEventListener("click", function() {
+    if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+    }
+    alert("Your order has been placed successfully!");
+    cart = [];
+    document.getElementById("cartItems").innerHTML = "";
+    document.getElementById("cartPopup").style.display = "none";
+});
+
 
         // ปิด pop-up รถเข็น
         document.getElementById("closeCartPopup").addEventListener("click", function() {

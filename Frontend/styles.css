@@ -164,7 +164,57 @@ button:disabled {
 button:hover {
     background-color: #0056b3;
 }
+/* เพิ่มสไตล์รถเข็น */
+body {
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+}
 
+.container {
+    height: auto;
+    min-height: 90vh;
+    margin: 20px 0;
+}
+
+.cart-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.cart-icon {
+    font-size: 24px;
+    cursor: pointer;
+    background: white;
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.cart-summary {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    max-height: 70vh;
+    overflow-y: auto;
+    width: 300px;
+}
+
+#cartContent {
+    max-height: 200px;
+    overflow-y: auto;
+    margin: 10px 0;
+}
+
+/* สไตล์เดิมทั้งหมดคงไว้ตามเดิม... */
+/* [ใส่สไตล์เดิมทั้งหมดตรงนี้โดยไม่แก้ไข] */
 /* Mobile Styles */
 @media (max-width: 600px) {
     .container {

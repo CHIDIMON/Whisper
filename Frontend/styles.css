@@ -22,8 +22,8 @@ body {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
+    align-items: center;         /* จัดตำแหน่งเนื้อหาภายในให้ตรงกลาง */
+    justify-content: center;     /* จัดให้เนื้อหาทั้งหมดอยู่กลาง */
 }
 
 h1 {
@@ -101,120 +101,12 @@ pre {
 /* จัดตำแหน่งกลางรูปภาพ */
 #menuImage {
     display: block;
-    margin: 20px auto;
-    max-width: 300px;
-    height: auto;
-    border-radius: 10px;
+    margin: 20px auto;           /* จัดให้อยู่ตรงกลาง */
+    max-width: 300px;            /* จำกัดขนาดสูงสุดของรูปภาพ */
+    height: auto;                /* ปรับความสูงให้สอดคล้องกับความกว้าง */
+    border-radius: 10px;         /* เพิ่มมุมโค้งให้กับรูปภาพ */
 }
 
-/* Cart Icon */
-.cart-icon {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: lightgreen;
-    padding: 15px;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.cart-icon img {
-    width: 30px;
-    height: 30px;
-}
-
-/* Cart Popup */
-.cart-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-}
-
-.cart-popup-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 300px;
-    text-align: center;
-}
-
-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 12px 30px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 20px;
-}
-
-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-/* เพิ่มสไตล์รถเข็น */
-body {
-    min-height: 100vh;
-    height: auto;
-    overflow-y: auto;
-}
-
-.container {
-    height: auto;
-    min-height: 90vh;
-    margin: 20px 0;
-}
-
-.cart-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-.cart-icon {
-    font-size: 24px;
-    cursor: pointer;
-    background: white;
-    padding: 10px;
-    border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.cart-summary {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 50px;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    max-height: 70vh;
-    overflow-y: auto;
-    width: 300px;
-}
-
-#cartContent {
-    max-height: 200px;
-    overflow-y: auto;
-    margin: 10px 0;
-}
-
-/* สไตล์เดิมทั้งหมดคงไว้ตามเดิม... */
-/* [ใส่สไตล์เดิมทั้งหมดตรงนี้โดยไม่แก้ไข] */
 /* Mobile Styles */
 @media (max-width: 600px) {
     .container {

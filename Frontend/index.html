@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Transcription</title>
+    <title>Audio Transcription with Shopping Cart</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,7 +19,6 @@
                 <option value="es">Spanish</option>
                 <option value="fr">French</option>
                 <option value="de">German</option>
-                <!-- เพิ่มภาษาอื่นๆ ตามต้องการ -->
             </select>
             <br><br>
             <input type="file" name="file" id="fileInput" accept="audio/*">
@@ -28,29 +27,69 @@
             <button type="submit">Upload Audio File</button>
         </form>
 
-        <!-- ปุ่มสำหรับบันทึกเสียง -->
         <button id="recordButton">Record Audio</button>
         <button id="stopButton" disabled>Stop Recording</button>
         <button id="uploadButton" disabled>Upload Recorded Audio</button>
         <audio id="audioPlayer" controls></audio>
 
-        <!-- แสดงผลการถอดเสียงและเมนู -->
         <h2>Transcribed Text:</h2>
         <pre id="transcribedText"></pre>
         
         <h2>Detected Menu:</h2>
         <p id="menuName"></p>
         <img id="menuImage" src="" style="display: none; max-width: 300px;" alt="Menu Image">
+
+        <!-- Shopping Cart Icon -->
+        <div id="cartIcon" class="cart-icon">
+            <img src="cart-icon.png" alt="Cart">
+        </div>
+
+        <!-- Shopping Cart Popup -->
+        <div id="cartPopup" class="cart-popup">
+            <div class="cart-popup-content">
+                <h2>Order Summary</h2>
+                <ul id="cartItems"></ul>
+                <button id="closeCartPopup">Close</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // ฟังก์ชันอัปโหลดไฟล์
+        // ฟังก์ชันแอดสินค้าลงตะกร้า
+        let cart = [];
+
+        function addToCart(item) {
+            cart.push(item);
+            updateCartPopup();
+        }
+
+        // อัปเดตสรุปใน Popup
+        function updateCartPopup() {
+            const cartItemsList = document.getElementById("cartItems");
+            cartItemsList.innerHTML = ""; // Clear previous list
+
+            cart.forEach(item => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                cartItemsList.appendChild(li);
+            });
+        }
+
+        // เมื่อคลิกที่ไอคอนรถเข็น
+        document.getElementById("cartIcon").addEventListener("click", function() {
+            document.getElementById("cartPopup").style.display = "block";
+        });
+
+        // เมื่อคลิกที่ปุ่มปิด popup
+        document.getElementById("closeCartPopup").addEventListener("click", function() {
+            document.getElementById("cartPopup").style.display = "none";
+        });
+
+        // เมื่อแปลข้อความสำเร็จ
         async function uploadFile(file, language) {
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("language", language);  // ส่งภาษาที่เลือกไปกับไฟล์
-            
-            document.getElementById("transcribedText").textContent = "Uploading...";
+            formData.append("language", language);
 
             const response = await fetch("http://127.0.0.1:5000/upload", { 
                 method: "POST", 
@@ -60,11 +99,14 @@
             const data = await response.json();
             if (data.text) {
                 document.getElementById("transcribedText").textContent = data.text;
-                
+
                 if (data.menu) {
                     document.getElementById("menuName").textContent = "Menu: " + data.menu;
                     document.getElementById("menuImage").src = `http://127.0.0.1:5000/image/${data.menu}`;
                     document.getElementById("menuImage").style.display = "block";
+
+                    // Add to cart automatically
+                    addToCart(data.menu);
                 } else {
                     document.getElementById("menuName").textContent = "No matching menu found.";
                     document.getElementById("menuImage").style.display = "none";
@@ -74,70 +116,18 @@
             }
         }
 
-        // เมื่อผู้ใช้เลือกไฟล์
+        // ฟังก์ชันที่เชื่อมต่อกับการอัปโหลดไฟล์
         document.getElementById("uploadForm").addEventListener("submit", function(event) {
             event.preventDefault();
             const fileInput = document.getElementById("fileInput").files[0];
-            const language = document.getElementById("languageSelect").value;  // รับภาษาจาก dropdown
+            const language = document.getElementById("languageSelect").value;
             
             if (!fileInput) {
                 alert("No file selected!");
                 return;
             }
 
-            uploadFile(fileInput, language);  // ส่งภาษาที่เลือกไปในฟังก์ชัน
-        });
-
-        // การบันทึกเสียง
-        let mediaRecorder;
-        let audioChunks = [];
-        let audioBlob = null;
-
-        document.getElementById("recordButton").addEventListener("click", async function() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-                mediaRecorder.onstop = function() {
-                    audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    document.getElementById("audioPlayer").src = audioUrl;
-                    document.getElementById("uploadButton").disabled = false;
-                };
-                mediaRecorder.start();
-                document.getElementById("stopButton").disabled = false;
-                document.getElementById("recordButton").disabled = true;
-            } catch (error) {
-                console.error("Error accessing microphone:", error);
-                alert("Failed to access the microphone.");
-            }
-        });
-
-        document.getElementById("stopButton").addEventListener("click", function() {
-            mediaRecorder.stop();
-            document.getElementById("stopButton").disabled = true;
-            document.getElementById("recordButton").disabled = false;
-        });
-
-        document.getElementById("uploadButton").addEventListener("click", function() {
-            if (!audioBlob) {
-                alert("No audio recorded!");
-                return;
-            }
-            const language = document.getElementById("languageSelect").value;  // รับภาษาจาก dropdown
-            uploadFile(audioBlob, language);  // ส่งภาษาที่เลือกไปในฟังก์ชัน
-        });
-
-        // เมื่อเลือกไฟล์จาก input
-        document.getElementById("fileInput").addEventListener("change", function(event) {
-            const fileName = event.target.files[0] ? event.target.files[0].name : "No file selected";
-            document.getElementById("fileName").textContent = fileName;
-            
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('audio')) {
-                const audioUrl = URL.createObjectURL(file);
-                document.getElementById("audioPlayer").src = audioUrl;
-            }
+            uploadFile(fileInput, language);
         });
     </script>
 </body>

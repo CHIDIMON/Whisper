@@ -22,8 +22,8 @@ body {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: center;         /* จัดตำแหน่งเนื้อหาภายในให้ตรงกลาง */
-    justify-content: center;     /* จัดให้เนื้อหาทั้งหมดอยู่กลาง */
+    align-items: center;
+    justify-content: center;
 }
 
 h1 {
@@ -101,10 +101,52 @@ pre {
 /* จัดตำแหน่งกลางรูปภาพ */
 #menuImage {
     display: block;
-    margin: 20px auto;           /* จัดให้อยู่ตรงกลาง */
-    max-width: 300px;            /* จำกัดขนาดสูงสุดของรูปภาพ */
-    height: auto;                /* ปรับความสูงให้สอดคล้องกับความกว้าง */
-    border-radius: 10px;         /* เพิ่มมุมโค้งให้กับรูปภาพ */
+    margin: 20px auto;
+    max-width: 300px;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* Pop-up styling */
+.cart-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    z-index: 1000;
+}
+
+.cart-popup ul {
+    list-style: none;
+    padding: 0;
+}
+
+.cart-popup li {
+    background-color: #333;
+    margin: 5px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.cart-popup button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.cart-popup button:hover {
+    background-color: #0056b3;
 }
 
 /* Mobile Styles */

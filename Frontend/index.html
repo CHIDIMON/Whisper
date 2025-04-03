@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio Transcription</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css"> <!-- เชื่อมโยงกับไฟล์ styles.css -->
 </head>
 <body>
     <div class="container">
@@ -19,7 +19,6 @@
                 <option value="es">Spanish</option>
                 <option value="fr">French</option>
                 <option value="de">German</option>
-                <!-- เพิ่มภาษาอื่นๆ ตามต้องการ -->
             </select>
             <br><br>
             <input type="file" name="file" id="fileInput" accept="audio/*">
@@ -41,6 +40,18 @@
         <h2>Detected Menu:</h2>
         <p id="menuName"></p>
         <img id="menuImage" src="" style="display: none; max-width: 300px;" alt="Menu Image">
+        
+        <!-- ปุ่มเพิ่มลงในรถเข็น -->
+        <button id="addToCartButton" style="display:none;">Add to Cart</button>
+
+        <!-- Pop-up สำหรับรถเข็น -->
+        <div id="cartPopup" class="cart-popup" style="display: none;">
+            <h3>Your Cart</h3>
+            <ul id="cartItems"></ul>
+            <button id="closeCartPopup">Close</button>
+        </div>
+
+        <button id="viewCartButton">View Cart</button>
     </div>
 
     <script>
@@ -65,9 +76,11 @@
                     document.getElementById("menuName").textContent = "Menu: " + data.menu;
                     document.getElementById("menuImage").src = `http://127.0.0.1:5000/image/${data.menu}`;
                     document.getElementById("menuImage").style.display = "block";
+                    document.getElementById("addToCartButton").style.display = "inline-block"; // แสดงปุ่มเพิ่มลงในรถเข็น
                 } else {
                     document.getElementById("menuName").textContent = "No matching menu found.";
                     document.getElementById("menuImage").style.display = "none";
+                    document.getElementById("addToCartButton").style.display = "none"; // ซ่อนปุ่มเมื่อไม่พบเมนู
                 }
             } else {
                 document.getElementById("transcribedText").textContent = "Error: " + data.error;
@@ -138,6 +151,34 @@
                 const audioUrl = URL.createObjectURL(file);
                 document.getElementById("audioPlayer").src = audioUrl;
             }
+        });
+
+        // เพิ่มเมนูลงในรถเข็น
+        let cart = [];
+
+        document.getElementById("addToCartButton").addEventListener("click", function() {
+            const menuName = document.getElementById("menuName").textContent.replace('Menu: ', '');
+            cart.push(menuName);
+            alert(`${menuName} added to your cart!`);
+        });
+
+        // แสดง pop-up รถเข็น
+        document.getElementById("viewCartButton").addEventListener("click", function() {
+            const cartItemsList = document.getElementById("cartItems");
+            cartItemsList.innerHTML = ''; // ล้างรายการเก่า
+
+            cart.forEach(item => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                cartItemsList.appendChild(li);
+            });
+
+            document.getElementById("cartPopup").style.display = "block";
+        });
+
+        // ปิด pop-up รถเข็น
+        document.getElementById("closeCartPopup").addEventListener("click", function() {
+            document.getElementById("cartPopup").style.display = "none";
         });
     </script>
 </body>

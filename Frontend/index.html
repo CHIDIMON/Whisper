@@ -169,28 +169,50 @@
     const cartItemsList = document.getElementById("cartItems");
     cartItemsList.innerHTML = '';
 
-    cart.forEach((item, index) => {
+    cart.forEach((menu, index) => {
         const li = document.createElement("li");
-        li.textContent = item;
+        li.style.display = "flex";
+        li.style.alignItems = "center";
+        li.style.justifyContent = "space-between";
+        li.style.padding = "10px";
+        li.style.borderBottom = "1px solid #ddd";
 
-        // ปุ่มลบเมนูเฉพาะตัว
+        // รูปเมนู
+        const menuImg = document.createElement("img");
+        menuImg.src = `http://127.0.0.1:5000/image/${menu}`;
+        menuImg.style.width = "50px";
+        menuImg.style.height = "50px";
+        menuImg.style.borderRadius = "10px";
+        menuImg.style.marginRight = "10px";
+
+        // ชื่อเมนู
+        const menuText = document.createElement("span");
+        menuText.textContent = menu;
+        menuText.style.flexGrow = "1";
+
+        // ปุ่มลบเมนู
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "❌";
+        deleteButton.style.fontSize = "12px";
         deleteButton.style.marginLeft = "10px";
-        deleteButton.style.color = "red";
+        deleteButton.style.background = "none";
         deleteButton.style.border = "none";
         deleteButton.style.cursor = "pointer";
+        deleteButton.style.color = "red";
         deleteButton.addEventListener("click", function() {
             cart.splice(index, 1);
             document.getElementById("viewCartButton").click();
         });
 
+        li.appendChild(menuImg);
+        li.appendChild(menuText);
         li.appendChild(deleteButton);
         cartItemsList.appendChild(li);
     });
 
     document.getElementById("cartPopup").style.display = "block";
 });
+
 
 // ลบออเดอร์ทั้งหมด
 document.getElementById("deleteOrderButton").addEventListener("click", function() {

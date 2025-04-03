@@ -7,17 +7,6 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- เพิ่มระบบรถเข็น -->
-    <div class="cart-container">
-        <div class="cart-icon" onclick="toggleCart()">🛒 <span id="cartCount">0</span></div>
-        <div class="cart-summary" id="cartSummary">
-            <h3>สรุปออเดอร์</h3>
-            <div class="cart-content" id="cartContent"></div>
-            <div class="cart-total">Total: $<span id="cartTotal">0.00</span></div>
-            <button onclick="checkout()">Checkout</button>
-        </div>
-    </div>
-
     <div class="container">
         <h1>Record or Upload Audio File for Transcription</h1>
         
@@ -30,6 +19,7 @@
                 <option value="es">Spanish</option>
                 <option value="fr">French</option>
                 <option value="de">German</option>
+                <!-- เพิ่มภาษาอื่นๆ ตามต้องการ -->
             </select>
             <br><br>
             <input type="file" name="file" id="fileInput" accept="audio/*">
@@ -51,58 +41,15 @@
         <h2>Detected Menu:</h2>
         <p id="menuName"></p>
         <img id="menuImage" src="" style="display: none; max-width: 300px;" alt="Menu Image">
-        
-        <!-- ปุ่มเพิ่มในรถเข็น -->
-        <button id="addToCart" style="display: none;" onclick="addToCart()">เพิ่มในรถเข็น</button>
     </div>
 
     <script>
-        // ระบบรถเข็น
-        let cartItems = [];
-        let currentMenu = null;
-
-        function updateCartDisplay() {
-            document.getElementById('cartCount').textContent = cartItems.length;
-            
-            let total = 0;
-            const cartContent = document.getElementById('cartContent');
-            cartContent.innerHTML = cartItems.map((item, index) => {
-                total += item.price;
-                return `<div>${index+1}. ${item.name} - $${item.price.toFixed(2)}</div>`;
-            }).join('');
-            
-            document.getElementById('cartTotal').textContent = total.toFixed(2);
-        }
-
-        function toggleCart() {
-            const cartSummary = document.getElementById('cartSummary');
-            cartSummary.style.display = cartSummary.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function addToCart() {
-            if (!currentMenu) return;
-            
-            cartItems.push({
-                name: currentMenu,
-                price: 10.00
-            });
-            
-            updateCartDisplay();
-            alert('เพิ่มในรถเข็นเรียบร้อย!');
-        }
-
-        function checkout() {
-            alert(`การชำระเงินทั้งหมด: $${document.getElementById('cartTotal').textContent}`);
-            cartItems = [];
-            updateCartDisplay();
-        }
-
-        // ระบบเดิม
+        // ฟังก์ชันอัปโหลดไฟล์
         async function uploadFile(file, language) {
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("language", language);
-
+            formData.append("language", language);  // ส่งภาษาที่เลือกไปกับไฟล์
+            
             document.getElementById("transcribedText").textContent = "Uploading...";
 
             const response = await fetch("http://127.0.0.1:5000/upload", { 
@@ -118,21 +65,80 @@
                     document.getElementById("menuName").textContent = "Menu: " + data.menu;
                     document.getElementById("menuImage").src = `http://127.0.0.1:5000/image/${data.menu}`;
                     document.getElementById("menuImage").style.display = "block";
-                    document.getElementById("addToCart").style.display = "block";
-                    currentMenu = data.menu;
                 } else {
                     document.getElementById("menuName").textContent = "No matching menu found.";
                     document.getElementById("menuImage").style.display = "none";
-                    document.getElementById("addToCart").style.display = "none";
-                    currentMenu = null;
                 }
             } else {
                 document.getElementById("transcribedText").textContent = "Error: " + data.error;
             }
         }
 
-        // ส่วน Event Listeners เดิมทั้งหมดคงไว้ตามเดิม...
-        // [ใส่ส่วน Event Listeners เดิมทั้งหมดตรงนี้โดยไม่แก้ไข]
+        // เมื่อผู้ใช้เลือกไฟล์
+        document.getElementById("uploadForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById("fileInput").files[0];
+            const language = document.getElementById("languageSelect").value;  // รับภาษาจาก dropdown
+            
+            if (!fileInput) {
+                alert("No file selected!");
+                return;
+            }
+
+            uploadFile(fileInput, language);  // ส่งภาษาที่เลือกไปในฟังก์ชัน
+        });
+
+        // การบันทึกเสียง
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob = null;
+
+        document.getElementById("recordButton").addEventListener("click", async function() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = function() {
+                    audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    document.getElementById("audioPlayer").src = audioUrl;
+                    document.getElementById("uploadButton").disabled = false;
+                };
+                mediaRecorder.start();
+                document.getElementById("stopButton").disabled = false;
+                document.getElementById("recordButton").disabled = true;
+            } catch (error) {
+                console.error("Error accessing microphone:", error);
+                alert("Failed to access the microphone.");
+            }
+        });
+
+        document.getElementById("stopButton").addEventListener("click", function() {
+            mediaRecorder.stop();
+            document.getElementById("stopButton").disabled = true;
+            document.getElementById("recordButton").disabled = false;
+        });
+
+        document.getElementById("uploadButton").addEventListener("click", function() {
+            if (!audioBlob) {
+                alert("No audio recorded!");
+                return;
+            }
+            const language = document.getElementById("languageSelect").value;  // รับภาษาจาก dropdown
+            uploadFile(audioBlob, language);  // ส่งภาษาที่เลือกไปในฟังก์ชัน
+        });
+
+        // เมื่อเลือกไฟล์จาก input
+        document.getElementById("fileInput").addEventListener("change", function(event) {
+            const fileName = event.target.files[0] ? event.target.files[0].name : "No file selected";
+            document.getElementById("fileName").textContent = fileName;
+            
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('audio')) {
+                const audioUrl = URL.createObjectURL(file);
+                document.getElementById("audioPlayer").src = audioUrl;
+            }
+        });
     </script>
 </body>
 </html>

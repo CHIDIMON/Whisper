@@ -36,7 +36,8 @@
         <!-- แสดงผลการถอดเสียงและเมนู -->
         <h2>Transcribed Text:</h2>
         <pre id="transcribedText"></pre>
-        
+        <h2>AI Response:</h2>
+        <div id="aiResponseContainer"></div>
         <h2>Detected Menu:</h2>
         <p id="menuName"></p>
         <img id="menuImage" src="" style="display: none; max-width: 300px;" alt="Menu Image">
@@ -57,6 +58,33 @@
     </div>
 
     <script>
+        async function sendMessageToChat(userMessage) {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: userMessage })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            console.log("AI response: ", data.response);
+            // แสดงผลใน UI หรือทำอย่างอื่น
+            document.getElementById('aiResponseContainer').textContent = data.response;
+        } else {
+            console.error("Error:", data.error);
+            alert("Error: " + data.error);
+        }
+    } catch (error) {
+        console.error("Error sending message:", error);
+        alert("Failed to communicate with the server.");
+    }
+}
+
+
         // ฟังก์ชันอัปโหลดไฟล์
         async function uploadFile(file, language) {
             const formData = new FormData();

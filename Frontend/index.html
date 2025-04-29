@@ -59,79 +59,69 @@
 
     <script>
         async function sendMessageToChat(userMessage) {
-    try {
-        const response = await fetch('http://127.0.0.1:5000/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text: userMessage })
-        });
+            try {
+                const response = await fetch('http://127.0.0.1:5000/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: userMessage })
+                });
 
-        const data = await response.json();
-        
-        if (response.ok) {
-            console.log("AI response: ", data.response);
-            // แสดงผลใน UI หรือทำอย่างอื่น
-            document.getElementById('aiResponseContainer').textContent = data.response;
-        } else {
-            console.error("Error:", data.error);
-            alert("Error: " + data.error);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('aiResponseContainer').textContent = data.response;
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (error) {
+                alert("Failed to communicate with the server.");
+            }
         }
-    } catch (error) {
-        console.error("Error sending message:", error);
-        alert("Failed to communicate with the server.");
-    }
-}
 
-
-        // ฟังก์ชันอัปโหลดไฟล์
         async function uploadFile(file, language) {
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("language", language);  // ส่งภาษาที่เลือกไปกับไฟล์
-            
+            formData.append("language", language);
+
             document.getElementById("transcribedText").textContent = "Uploading...";
 
-            const response = await fetch("http://127.0.0.1:5000/upload", { 
-                method: "POST", 
-                body: formData 
+            const response = await fetch("http://127.0.0.1:5000/upload", {
+                method: "POST",
+                body: formData
             });
 
             const data = await response.json();
             if (data.text) {
                 document.getElementById("transcribedText").textContent = data.text;
-                
+
+                if (data.chat_response) {
+                    document.getElementById('aiResponseContainer').textContent = data.chat_response;
+                }
+
                 if (data.menu) {
                     document.getElementById("menuName").textContent = "Menu: " + data.menu;
                     document.getElementById("menuImage").src = `http://127.0.0.1:5000/image/${data.menu}`;
                     document.getElementById("menuImage").style.display = "block";
-                    document.getElementById("addToCartButton").style.display = "inline-block"; // แสดงปุ่มเพิ่มลงในรถเข็น
+                    document.getElementById("addToCartButton").style.display = "inline-block";
                 } else {
                     document.getElementById("menuName").textContent = "No matching menu found.";
                     document.getElementById("menuImage").style.display = "none";
-                    document.getElementById("addToCartButton").style.display = "none"; // ซ่อนปุ่มเมื่อไม่พบเมนู
+                    document.getElementById("addToCartButton").style.display = "none";
                 }
-            } else {
-                document.getElementById("transcribedText").textContent = "Error: " + data.error;
             }
         }
 
-        // เมื่อผู้ใช้เลือกไฟล์
         document.getElementById("uploadForm").addEventListener("submit", function(event) {
             event.preventDefault();
             const fileInput = document.getElementById("fileInput").files[0];
-            const language = document.getElementById("languageSelect").value;  // รับภาษาจาก dropdown
-            
+            const language = document.getElementById("languageSelect").value;
             if (!fileInput) {
                 alert("No file selected!");
                 return;
             }
-
-            uploadFile(fileInput, language);  // ส่งภาษาที่เลือกไปในฟังก์ชัน
+            uploadFile(fileInput, language);
         });
 
-        // การบันทึกเสียง
         let mediaRecorder;
         let audioChunks = [];
         let audioBlob = null;
@@ -140,6 +130,8 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
                 mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
                 mediaRecorder.onstop = function() {
                     audioBlob = new Blob(audioChunks, { type: "audio/wav" });
@@ -147,11 +139,11 @@
                     document.getElementById("audioPlayer").src = audioUrl;
                     document.getElementById("uploadButton").disabled = false;
                 };
+
                 mediaRecorder.start();
                 document.getElementById("stopButton").disabled = false;
                 document.getElementById("recordButton").disabled = true;
             } catch (error) {
-                console.error("Error accessing microphone:", error);
                 alert("Failed to access the microphone.");
             }
         });
@@ -167,23 +159,19 @@
                 alert("No audio recorded!");
                 return;
             }
-            const language = document.getElementById("languageSelect").value;  // รับภาษาจาก dropdown
-            uploadFile(audioBlob, language);  // ส่งภาษาที่เลือกไปในฟังก์ชัน
+            const language = document.getElementById("languageSelect").value;
+            uploadFile(audioBlob, language);
         });
 
-        // เมื่อเลือกไฟล์จาก input
         document.getElementById("fileInput").addEventListener("change", function(event) {
-            const fileName = event.target.files[0] ? event.target.files[0].name : "No file selected";
-            document.getElementById("fileName").textContent = fileName;
-            
             const file = event.target.files[0];
+            document.getElementById("fileName").textContent = file ? file.name : "No file selected";
             if (file && file.type.startsWith('audio')) {
                 const audioUrl = URL.createObjectURL(file);
                 document.getElementById("audioPlayer").src = audioUrl;
             }
         });
 
-        // เพิ่มเมนูลงในรถเข็น
         let cart = [];
 
         document.getElementById("addToCartButton").addEventListener("click", function() {
@@ -192,77 +180,68 @@
             alert(`${menuName} added to your cart!`);
         });
 
-        // แสดง pop-up รถเข็น
         document.getElementById("viewCartButton").addEventListener("click", function() {
-    const cartItemsList = document.getElementById("cartItems");
-    cartItemsList.innerHTML = '';
+            const cartItemsList = document.getElementById("cartItems");
+            cartItemsList.innerHTML = '';
 
-    cart.forEach((menu, index) => {
-        const li = document.createElement("li");
-        li.style.display = "flex";
-        li.style.alignItems = "center";
-        li.style.justifyContent = "space-between";
-        li.style.padding = "10px";
-        li.style.borderBottom = "1px solid #ddd";
+            cart.forEach((menu, index) => {
+                const li = document.createElement("li");
+                li.style.display = "flex";
+                li.style.alignItems = "center";
+                li.style.justifyContent = "space-between";
+                li.style.padding = "10px";
+                li.style.borderBottom = "1px solid #ddd";
 
-        // รูปเมนู
-        const menuImg = document.createElement("img");
-        menuImg.src = `http://127.0.0.1:5000/image/${menu}`;
-        menuImg.style.width = "50px";
-        menuImg.style.height = "50px";
-        menuImg.style.borderRadius = "10px";
-        menuImg.style.marginRight = "10px";
+                const menuImg = document.createElement("img");
+                menuImg.src = `http://127.0.0.1:5000/image/${menu}`;
+                menuImg.style.width = "50px";
+                menuImg.style.height = "50px";
+                menuImg.style.borderRadius = "10px";
+                menuImg.style.marginRight = "10px";
 
-        // ชื่อเมนู
-        const menuText = document.createElement("span");
-        menuText.textContent = menu;
-        menuText.style.flexGrow = "1";
+                const menuText = document.createElement("span");
+                menuText.textContent = menu;
+                menuText.style.flexGrow = "1";
 
-        // ปุ่มลบเมนู
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "❌";
-        deleteButton.style.fontSize = "12px";
-        deleteButton.style.marginLeft = "10px";
-        deleteButton.style.background = "none";
-        deleteButton.style.border = "none";
-        deleteButton.style.cursor = "pointer";
-        deleteButton.style.color = "red";
-        deleteButton.addEventListener("click", function() {
-            cart.splice(index, 1);
-            document.getElementById("viewCartButton").click();
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "❌";
+                deleteButton.style.fontSize = "12px";
+                deleteButton.style.marginLeft = "10px";
+                deleteButton.style.background = "none";
+                deleteButton.style.border = "none";
+                deleteButton.style.cursor = "pointer";
+                deleteButton.style.color = "red";
+                deleteButton.addEventListener("click", function() {
+                    cart.splice(index, 1);
+                    document.getElementById("viewCartButton").click();
+                });
+
+                li.appendChild(menuImg);
+                li.appendChild(menuText);
+                li.appendChild(deleteButton);
+                cartItemsList.appendChild(li);
+            });
+
+            document.getElementById("cartPopup").style.display = "block";
         });
 
-        li.appendChild(menuImg);
-        li.appendChild(menuText);
-        li.appendChild(deleteButton);
-        cartItemsList.appendChild(li);
-    });
+        document.getElementById("deleteOrderButton").addEventListener("click", function() {
+            cart = [];
+            document.getElementById("cartItems").innerHTML = "";
+            alert("Order deleted!");
+        });
 
-    document.getElementById("cartPopup").style.display = "block";
-});
+        document.getElementById("placeOrderButton").addEventListener("click", function() {
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            alert("Your order has been placed successfully!");
+            cart = [];
+            document.getElementById("cartItems").innerHTML = "";
+            document.getElementById("cartPopup").style.display = "none";
+        });
 
-
-// ลบออเดอร์ทั้งหมด
-document.getElementById("deleteOrderButton").addEventListener("click", function() {
-    cart = [];
-    document.getElementById("cartItems").innerHTML = "";
-    alert("Order deleted!");
-});
-
-// สั่งอาหาร
-document.getElementById("placeOrderButton").addEventListener("click", function() {
-    if (cart.length === 0) {
-        alert("Your cart is empty!");
-        return;
-    }
-    alert("Your order has been placed successfully!");
-    cart = [];
-    document.getElementById("cartItems").innerHTML = "";
-    document.getElementById("cartPopup").style.display = "none";
-});
-
-
-        // ปิด pop-up รถเข็น
         document.getElementById("closeCartPopup").addEventListener("click", function() {
             document.getElementById("cartPopup").style.display = "none";
         });

@@ -1,0 +1,130 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background-color: #f0f0f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* หน้าเลือกภาษา */
+.language-container {
+  text-align: center;
+  padding: 10px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.language-container h1 {
+  margin-bottom: 50px;
+  font-size: 32px;
+  color: #333;
+}
+
+.flags {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 4 columns fixed */
+  gap: 50px;
+  justify-items: center;
+  padding: 0 10px;
+}
+
+.flag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.flag img {
+  width: 60px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.flag span {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #444;
+  text-align: center;
+}
+
+.flag:hover {
+  transform: scale(1.1);
+}
+
+/* หน้าหลัก */
+.container {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 800px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+.container h1 {
+  margin-bottom: 10px;
+}
+
+#selectedLanguageDisplay {
+  font-weight: bold;
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+form {
+  margin-top: 20px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#audioPlayer {
+  margin-top: 20px;
+  width: 100%;
+}
+
+#aiResponse {
+  margin-top: 30px;
+}
+
+.popup {
+  margin-top: 30px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+.popup ul {
+  list-style: none;
+  padding: 0;
+}
+
+.popup li {
+  margin-bottom: 5px;
+}
+
+/* Responsive flags */
+@media (max-width: 600px) {
+  .flags {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .flag img {
+    width: 70px;
+  }
+  .flag span {
+    font-size: 14px;
+  }
+}

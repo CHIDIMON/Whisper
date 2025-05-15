@@ -1,0 +1,239 @@
+html, body {
+    height: 100%;  
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f5f5f7;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.container {
+    background-color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 800px;
+    padding: 40px;
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+/* ปรับการเลื่อนภายใน pre ให้สามารถเลื่อนเอง */
+pre {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    font-size: 16px;
+    word-wrap: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+h1 {
+    color: #333;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #666;
+    font-size: 24px;
+    margin-top: 40px;
+    margin-bottom: 10px;
+}
+
+/* ปุ่มไมค์ดีไซน์ใหม่ */
+#recordBtn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #f1f3f4; /* เทาคลีน ๆ แบบ Google */
+  border: none;
+  cursor: pointer;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+#recordBtn .material-icons {
+  font-size: 36px;
+  color: #5f6368; /* สีไอคอนเทาเข้ม */
+  transition: color 0.3s ease;
+}
+
+#recordStatus {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #d93025; /* สีแดงแบบ Google */
+  min-height: 20px;
+  user-select: none;
+  font-weight: 600;
+}
+
+/* ตอนกำลังอัด */
+#recordBtn.recording {
+  background-color: #d93025; /* แดงเต็มปุ่ม */
+}
+
+#recordBtn.recording .material-icons {
+  color: #fff; /* ไอคอนสีขาว */
+}
+
+/* Button Styling (ทั่วไป ปุ่มอื่นๆ) */
+button:not(#recordBtn) {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 10px;
+}
+
+button:not(#recordBtn):disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+button:not(#recordBtn):hover {
+    background-color: #0056b3;
+}
+
+/* Input file styling */
+input[type="file"] {
+    display: none;
+}
+
+label {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+label:hover {
+    background-color: #0056b3;
+}
+
+/* Audio player styling */
+audio {
+    width: 100%;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+/* จัดตำแหน่งกลางรูปภาพ */
+#menuImage {
+    display: block;
+    margin: 20px auto;
+    max-width: 300px;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* Pop-up styling */
+.cart-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    z-index: 1000;
+}
+
+.cart-popup ul {
+    list-style: none;
+    padding: 0;
+}
+
+.cart-popup li {
+    background-color: #333;
+    margin: 5px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.cart-popup button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.cart-popup button:hover {
+    background-color: #0056b3;
+    
+}
+
+.cart-popup li button {
+    font-size: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: red;
+}
+
+/* Mobile Styles */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    button:not(#recordBtn) {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    label {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    pre {
+        font-size: 14px;
+        max-height: 150px;
+    }
+}

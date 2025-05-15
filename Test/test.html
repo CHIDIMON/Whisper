@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Select Language</title>
+  <link rel="stylesheet" href="test.css" />
+</head>
+<body>
+  <div class="language-container">
+    <h1>Select Language</h1>
+    <div class="flags">
+      <div class="flag" data-lang="th">
+        <img src="https://flagcdn.com/w80/th.png" alt="Thai"/>
+        <span>Thai</span>
+      </div>
+      <div class="flag" data-lang="en">
+        <img src="https://flagcdn.com/w80/gb.png" alt="English"/>
+        <span>English</span>
+      </div>
+      <div class="flag" data-lang="zh">
+        <img src="https://flagcdn.com/w80/cn.png" alt="Chinese"/>
+        <span>Chinese (Mandarin)</span>
+      </div>
+      <div class="flag" data-lang="ja">
+        <img src="https://flagcdn.com/w80/jp.png" alt="Japanese"/>
+        <span>Japanese</span>
+      </div>
+      <div class="flag" data-lang="ko">
+        <img src="https://flagcdn.com/w80/kr.png" alt="Korean"/>
+        <span>Korean</span>
+      </div>
+      <div class="flag" data-lang="fr">
+        <img src="https://flagcdn.com/w80/fr.png" alt="French"/>
+        <span>French</span>
+      </div>
+      <div class="flag" data-lang="de">
+        <img src="https://flagcdn.com/w80/de.png" alt="German"/>
+        <span>German</span>
+      </div>
+      <div class="flag" data-lang="es">
+        <img src="https://flagcdn.com/w80/es.png" alt="Spanish"/>
+        <span>Spanish</span>
+      </div>
+      <div class="flag" data-lang="ru">
+        <img src="https://flagcdn.com/w80/ru.png" alt="Russian"/>
+        <span>Russian</span>
+      </div>
+      <div class="flag" data-lang="ar">
+        <img src="https://flagcdn.com/w80/sa.png" alt="Arabic"/>
+        <span>Arabic</span>
+      </div>
+      <div class="flag" data-lang="vi">
+        <img src="https://flagcdn.com/w80/vn.png" alt="Vietnamese"/>
+        <span>Vietnamese</span>
+      </div>
+      <div class="flag" data-lang="hi">
+        <img src="https://flagcdn.com/w80/in.png" alt="Hindi"/>
+        <span>Hindi</span>
+      </div>
+      <div class="flag" data-lang="id">
+        <img src="https://flagcdn.com/w80/id.png" alt="Indonesian"/>
+        <span>Indonesian</span>
+      </div>
+      <div class="flag" data-lang="tr">
+        <img src="https://flagcdn.com/w80/tr.png" alt="Turkish"/>
+        <span>Turkish</span>
+      </div>
+      <div class="flag" data-lang="pt">
+        <img src="https://flagcdn.com/w80/pt.png" alt="Portuguese"/>
+        <span>Portuguese</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.flag').forEach(flag => {
+      flag.addEventListener('click', () => {
+        const selectedLang = flag.getAttribute('data-lang');
+        localStorage.setItem('selectedLanguage', selectedLang);
+        window.location.href = "main.html";
+      });
+    });
+  </script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const langMap = {
+      th: "Thai",
+      en: "English",
+      zh: "Chinese (Mandarin)",
+      ja: "Japanese",
+      ko: "Korean",
+      fr: "French",
+      de: "German",
+      es: "Spanish",
+      ru: "Russian",
+      ar: "Arabic",
+      vi: "Vietnamese",
+      hi: "Hindi",
+      id: "Indonesian",
+      tr: "Turkish",
+      pt: "Portuguese"
+    };
+
+    const selectedLangCode = localStorage.getItem('selectedLanguage');
+    const selectedLangText = langMap[selectedLangCode] || "Unknown";
+
+    const langDisplay = document.getElementById("selectedLanguageDisplay");
+    if (langDisplay) {
+      langDisplay.textContent = `Selected Language: ${selectedLangText}`;
+    }
+  });
+</script>
+</body>
+</html>

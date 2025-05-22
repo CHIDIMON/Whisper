@@ -1,0 +1,96 @@
+/* 🔧 พื้นหลังและฟอนต์ */
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  background-color: #f2f2f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* 📦 กล่องหลัก */
+.language-container {
+  background-color: #ffffff;
+  padding: 20px 24px;
+  border-radius: 30px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+  width: 95%;
+  max-width: 720px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* 🔤 หัวเรื่อง */
+.language-container h1 {
+  margin-bottom: 28px;
+  font-size: 22px;
+  color: #222;
+}
+
+/* 🌐 ตารางธงภาษา */
+.flags {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  justify-items: center;
+  padding: 0 5px;
+}
+
+/* 🏳️ ธงแต่ละภาษา */
+.flag {
+  background-color: #f8f9fc;
+  padding: 10px 8px;
+  border-radius: 14px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  max-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flag:hover {
+  background-color: #e3efff;
+  transform: translateY(-2px);
+}
+
+/* 🌍 รูปธง */
+.flag img {
+  width: 36px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 🗣️ ชื่อภาษา */
+.flag span {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #444;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* 📱 Responsive สำหรับมือถือ */
+@media (max-width: 600px) {
+  .flags {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .flag img {
+    width: 48px;
+  }
+
+  .flag span {
+    font-size: 12px;
+  }
+
+  .language-container h1 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+}

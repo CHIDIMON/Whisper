@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Transcription</title>
+    <link rel="stylesheet" href="styles.css"> <!-- เชื่อมโยงกับไฟล์ styles.css -->
+</head>
+<body>
+    <div class="container">
+        <h1>Record or Upload Audio File for Transcription</h1>
+        
+        <!-- ฟอร์มสำหรับอัปโหลดไฟล์ -->
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="languageSelect">Select Language:</label>
+            <select id="languageSelect" name="language">
+                <option value="en">English</option>
+                <option value="th">Thai</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+            </select>
+            <br><br>
+            <input type="file" name="file" id="fileInput" accept="audio/*">
+            <label for="fileInput">Select File</label>
+            <span id="fileName"></span>
+            <button type="submit">Upload Audio File</button>
+        </form>
+
+        <!-- ปุ่มสำหรับบันทึกเสียง -->
+        <button id="recordButton">Record Audio</button>
+        <button id="stopButton" disabled>Stop Recording</button>
+        <button id="uploadButton" disabled>Upload Recorded Audio</button>
+        <audio id="audioPlayer" controls></audio>
+
+        <!-- แสดงผลการถอดเสียงและเมนู -->
+        <h2>Transcribed Text:</h2>
+        <pre id="transcribedText"></pre>
+        <h2>AI Response:</h2>
+        <div id="aiResponseContainer"></div>
+        <h2>Detected Menu:</h2>
+        <p id="menuName"></p>
+        <img id="menuImage" src="" style="display: none; max-width: 300px;" alt="Menu Image">
+        
+        <!-- ปุ่มเพิ่มลงในรถเข็น -->
+        <button id="addToCartButton" style="display:none;">Add to Cart</button>
+
+        <!-- Pop-up สำหรับรถเข็น -->
+        <div id="cartPopup" class="cart-popup" style="display: none;">
+            <h3>Your Cart</h3>
+            <ul id="cartItems"></ul>
+            <button id="deleteOrderButton">Delete Order</button>
+            <button id="placeOrderButton">Place Order</button>
+            <button id="closeCartPopup">Close</button>
+        </div>
+
+        <button id="viewCartButton">View Cart</button>
+    </div>
+
+    <script>
+        async function sendMessageToChat(userMessage) {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: userMessage })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('aiResponseContainer').textContent = data.response;
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (error) {
+                alert("Failed to communicate with the server.");
+            }
+        }
+
+        async function uploadFile(file, language) {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("language", language);
+
+            document.getElementById("transcribedText").textContent = "Uploading...";
+
+            const response = await fetch("http://127.0.0.1:5000/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            if (data.text) {
+                document.getElementById("transcribedText").textContent = data.text;
+
+                if (data.chat_response) {
+                    document.getElementById('aiResponseContainer').textContent = data.chat_response;
+                }
+
+                if (data.menu) {
+                    document.getElementById("menuName").textContent = "Menu: " + data.menu;
+                    document.getElementById("menuImage").src = `http://127.0.0.1:5000/image/${data.menu}`;
+                    document.getElementById("menuImage").style.display = "block";
+                    document.getElementById("addToCartButton").style.display = "inline-block";
+                } else {
+                    document.getElementById("menuName").textContent = "No matching menu found.";
+                    document.getElementById("menuImage").style.display = "none";
+                    document.getElementById("addToCartButton").style.display = "none";
+                }
+            }
+        }
+
+        document.getElementById("uploadForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById("fileInput").files[0];
+            const language = document.getElementById("languageSelect").value;
+            if (!fileInput) {
+                alert("No file selected!");
+                return;
+            }
+            uploadFile(fileInput, language);
+        });
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob = null;
+
+        document.getElementById("recordButton").addEventListener("click", async function() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = function() {
+                    audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    document.getElementById("audioPlayer").src = audioUrl;
+                    document.getElementById("uploadButton").disabled = false;
+                };
+
+                mediaRecorder.start();
+                document.getElementById("stopButton").disabled = false;
+                document.getElementById("recordButton").disabled = true;
+            } catch (error) {
+                alert("Failed to access the microphone.");
+            }
+        });
+
+        document.getElementById("stopButton").addEventListener("click", function() {
+            mediaRecorder.stop();
+            document.getElementById("stopButton").disabled = true;
+            document.getElementById("recordButton").disabled = false;
+        });
+
+        document.getElementById("uploadButton").addEventListener("click", function() {
+            if (!audioBlob) {
+                alert("No audio recorded!");
+                return;
+            }
+            const language = document.getElementById("languageSelect").value;
+            uploadFile(audioBlob, language);
+        });
+
+        document.getElementById("fileInput").addEventListener("change", function(event) {
+            const file = event.target.files[0];
+            document.getElementById("fileName").textContent = file ? file.name : "No file selected";
+            if (file && file.type.startsWith('audio')) {
+                const audioUrl = URL.createObjectURL(file);
+                document.getElementById("audioPlayer").src = audioUrl;
+            }
+        });
+
+        let cart = [];
+
+        document.getElementById("addToCartButton").addEventListener("click", function() {
+            const menuName = document.getElementById("menuName").textContent.replace('Menu: ', '');
+            cart.push(menuName);
+            alert(`${menuName} added to your cart!`);
+        });
+
+        document.getElementById("viewCartButton").addEventListener("click", function() {
+            const cartItemsList = document.getElementById("cartItems");
+            cartItemsList.innerHTML = '';
+
+            cart.forEach((menu, index) => {
+                const li = document.createElement("li");
+                li.style.display = "flex";
+                li.style.alignItems = "center";
+                li.style.justifyContent = "space-between";
+                li.style.padding = "10px";
+                li.style.borderBottom = "1px solid #ddd";
+
+                const menuImg = document.createElement("img");
+                menuImg.src = `http://127.0.0.1:5000/image/${menu}`;
+                menuImg.style.width = "50px";
+                menuImg.style.height = "50px";
+                menuImg.style.borderRadius = "10px";
+                menuImg.style.marginRight = "10px";
+
+                const menuText = document.createElement("span");
+                menuText.textContent = menu;
+                menuText.style.flexGrow = "1";
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "❌";
+                deleteButton.style.fontSize = "12px";
+                deleteButton.style.marginLeft = "10px";
+                deleteButton.style.background = "none";
+                deleteButton.style.border = "none";
+                deleteButton.style.cursor = "pointer";
+                deleteButton.style.color = "red";
+                deleteButton.addEventListener("click", function() {
+                    cart.splice(index, 1);
+                    document.getElementById("viewCartButton").click();
+                });
+
+                li.appendChild(menuImg);
+                li.appendChild(menuText);
+                li.appendChild(deleteButton);
+                cartItemsList.appendChild(li);
+            });
+
+            document.getElementById("cartPopup").style.display = "block";
+        });
+
+        document.getElementById("deleteOrderButton").addEventListener("click", function() {
+            cart = [];
+            document.getElementById("cartItems").innerHTML = "";
+            alert("Order deleted!");
+        });
+
+        document.getElementById("placeOrderButton").addEventListener("click", function() {
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            alert("Your order has been placed successfully!");
+            cart = [];
+            document.getElementById("cartItems").innerHTML = "";
+            document.getElementById("cartPopup").style.display = "none";
+        });
+
+        document.getElementById("closeCartPopup").addEventListener("click", function() {
+            document.getElementById("cartPopup").style.display = "none";
+        });
+    </script>
+</body>
+</html>

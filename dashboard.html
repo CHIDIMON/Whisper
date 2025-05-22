@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - รายการอาหาร</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <style>
+    .status {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .status.waiting { color: orange; }
+    .status.cooking { color: dodgerblue; }
+    .status.served { color: green; }
+
+    .order-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .finish-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background-color: #77c6eb;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .finish-btn:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <h1>📋 รายการอาหารลูกค้า</h1>
+
+    <div class="order-list">
+
+      <!-- โต๊ะ 1 -->
+      <div class="order-card">
+        <button class="finish-btn" onclick="finishOrder(this)">Click To Finish</button>
+        <div class="order-header">
+          <span class="table-id">โต๊ะ 1</span>
+          <span class="order-time">⏰ 12:34</span>
+        </div>
+        <ul class="order-items">
+          <li>1. ข้าวกะเพราหมู - ไม่เผ็ด</li>
+          <li>2. ต้มยำกุ้ง - เผ็ดมาก</li>
+        </ul>
+        <div class="status waiting">🟡 รอทำอาหาร</div>
+      </div>
+
+      <!-- โต๊ะ 2 -->
+      <div class="order-card">
+        <button class="finish-btn" onclick="finishOrder(this)">Click To Finish</button>
+        <div class="order-header">
+          <span class="table-id">โต๊ะ 2</span>
+          <span class="order-time">⏰ 12:40</span>
+        </div>
+        <ul class="order-items">
+          <li>1. Pizza - เพิ่มชีส</li>
+        </ul>
+        <div class="status cooking">🔵 กำลังทำในครัว</div>
+      </div>
+
+      <!-- โต๊ะ 3 -->
+      <div class="order-card">
+        <button class="finish-btn" onclick="finishOrder(this)">Click To Finish</button>
+        <div class="order-header">
+          <span class="table-id">โต๊ะ 3</span>
+          <span class="order-time">⏰ 12:45</span>
+        </div>
+        <ul class="order-items">
+          <li>1. ผัดไทย - ไม่ใส่ถั่วงอก</li>
+          <li>2. น้ำเปล่า</li>
+        </ul>
+        <div class="status served">✅ เสิร์ฟแล้ว</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function finishOrder(button) {
+      const orderCard = button.closest('.order-card');
+      orderCard.style.opacity = '0.5';
+      orderCard.querySelector('.status').textContent = '✅ ออเดอร์เสร็จสมบูรณ์';
+      orderCard.querySelector('.status').className = 'status served';
+      button.disabled = true;
+      button.textContent = '✔ เสร็จแล้ว';
+      button.style.backgroundColor = '#6c757d';
+      button.style.cursor = 'default';
+    }
+  </script>
+
+</body>
+</html>

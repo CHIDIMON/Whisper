@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ระบบบันทึกเสียง พร้อม AI Response</title>
+  <link rel="stylesheet" href="main.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+</head>
+<body>
+
+  <div class="container">
+
+    <div class="selected-language" id="selectedLanguageDisplay"></div>
+
+    <h1>Ordering Food Holding The Button</h1>
+
+    <!-- ✅ ปุ่มไมค์อยู่กลาง container -->
+    <div class="record-section">
+      <button id="recordBtn" title="กดค้างเพื่อบันทึกเสียง">
+        <span class="material-icons" id="micIcon">mic</span>
+      </button>
+      <div id="recordStatus" class="record-status"></div>
+    </div>
+
+    <audio id="audioPlayer" controls style="display:none; margin-top: 15px;"></audio>
+
+    <div class="results">
+      <h2>Transcribed Text:</h2>
+      <pre id="transcribedText" class="transcribed-text"></pre>
+
+      <h2>AI Response:</h2>
+      <div id="aiResponseContainer" class="ai-response"></div>
+    </div>
+
+    <div id="menuImageContainer" style="margin-top: 20px;">
+      <h2>Menu Detech:</h2>
+      <img id="menuImage" src="" alt="เมนูอาหาร" style="max-width: 300px; display: none; border-radius: 10px;" />
+    </div>
+
+    <button class="send-order-btn">Send Order</button>
+    <button class="reset-chat-btn" onclick="resetChat()" >
+      ♻️ Reset การสนทนา
+    </button>
+
+  </div>
+
+  <script>
+    const langMap = {
+      th: { name: "Thai", flag: "https://flagcdn.com/w40/th.png" },
+      en: { name: "English", flag: "https://flagcdn.com/w40/gb.png" },
+      zh: { name: "Chinese (Mandarin)", flag: "https://flagcdn.com/w40/cn.png" },
+      ja: { name: "Japanese", flag: "https://flagcdn.com/w40/jp.png" },
+      ko: { name: "Korean", flag: "https://flagcdn.com/w40/kr.png" },
+      fr: { name: "French", flag: "https://flagcdn.com/w40/fr.png" },
+      de: { name: "German", flag: "https://flagcdn.com/w40/de.png" },
+      es: { name: "Spanish", flag: "https://flagcdn.com/w40/es.png" },
+      ru: { name: "Russian", flag: "https://flagcdn.com/w40/ru.png" },
+      ar: { name: "Arabic", flag: "https://flagcdn.com/w40/sa.png" },
+      vi: { name: "Vietnamese", flag: "https://flagcdn.com/w40/vn.png" },
+      hi: { name: "Hindi", flag: "https://flagcdn.com/w40/in.png" },
+      id: { name: "Indonesian", flag: "https://flagcdn.com/w40/id.png" },
+      tr: { name: "Turkish", flag: "https://flagcdn.com/w40/tr.png" },
+      pt: { name: "Portuguese", flag: "https://flagcdn.com/w40/pt.png" }
+    };
+
+    const selectedLangCode = localStorage.getItem('selectedLanguage') || 'th';
+    const selectedLang = langMap[selectedLangCode] || langMap['th'];
+    const langDisplayDiv = document.getElementById('selectedLanguageDisplay');
+    langDisplayDiv.innerHTML = `<img src="${selectedLang.flag}" alt="${selectedLang.name} Flag" /> ${selectedLang.name}`;
+
+    const recordBtn = document.getElementById("recordBtn");
+    const micIcon = document.getElementById("micIcon");
+    const recordStatus = document.getElementById("recordStatus");
+    const audioPlayer = document.getElementById("audioPlayer");
+    let mediaRecorder;
+    let audioChunks = [];
+
+    recordBtn.addEventListener("mousedown", startRecording);
+    recordBtn.addEventListener("mouseup", stopRecording);
+    recordBtn.addEventListener("mouseleave", () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        stopRecording();
+      }
+    });
+
+    function startRecording() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+          mediaRecorder.onstart = () => {
+            recordStatus.textContent = "กำลังบันทึกเสียง...";
+            recordBtn.classList.add("recording");
+          };
+
+          mediaRecorder.onstop = async () => {
+            recordStatus.textContent = "";
+            recordBtn.classList.remove("recording");
+            micIcon.textContent = "mic";
+
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            audioPlayer.src = audioUrl;
+            audioPlayer.style.display = "block";
+
+            const formData = new FormData();
+            formData.append("file", audioBlob, "recorded_audio.webm");
+            formData.append("language", selectedLangCode);
+
+            try {
+              const response = await fetch("http://localhost:5000/upload", {
+                method: "POST",
+                body: formData
+              });
+              const result = await response.json();
+
+              if (response.ok) {
+                document.getElementById("transcribedText").textContent = result.text || "";
+                const aiResponseDiv = document.getElementById("aiResponseContainer");
+                aiResponseDiv.textContent = result.chat_response || "";
+                aiResponseDiv.querySelectorAll("img").forEach(img => img.remove());
+
+                if (result.menu) {
+                  const menuImg = document.getElementById("menuImage");
+                  menuImg.src = `http://localhost:5000/image/${encodeURIComponent(result.menu)}`;
+                  menuImg.alt = result.menu;
+                  menuImg.style.display = "block";
+                } else {
+                  document.getElementById("menuImage").style.display = "none";
+                }
+
+              } else {
+                alert(result.error || "เกิดข้อผิดพลาด");
+              }
+            } catch {
+              alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+            }
+          };
+
+          mediaRecorder.start();
+        })
+        .catch(err => {
+          alert("ไม่สามารถเข้าถึงไมโครโฟน: " + err.message);
+        });
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+      }
+    }
+
+    function resetChat() {
+      fetch("http://localhost:5000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: "reset" })
+      })
+      .then(res => res.json())
+      .then(result => {
+        alert(result.response || "รีเซ็ตแล้ว");
+        document.getElementById("transcribedText").textContent = "reset";
+        document.getElementById("aiResponseContainer").textContent = result.response || "";
+        document.getElementById("menuImage").style.display = "none";
+      })
+      .catch(() => {
+        alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+      });
+    }
+  </script>
+
+</body>
+</html>
